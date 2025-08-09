@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,11 +25,21 @@ import {
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useDashboard } from '@/contexts/DashboardContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDebounce } from '@/hooks/useDebounce';
 import { authors, categories } from '@/data/mockData';
 
 export function TableFilters() {
   const { state, setFilters } = useDashboard();
-  const [searchValue, setSearchValue] = useState(state.filters.search);
+  const { hasPermission } = useAuth();
+  const [searchInput, setSearchInput] = useState(state.filters.search);
+  
+  // Debounce search input
+  const debouncedSearch = useDebounce(searchInput, 300);
+
+  useEffect(() => {
+    setFilters({ search: debouncedSearch });
+  }, [debouncedSearch, setFilters]);
   
   const hasActiveFilters = 
     state.filters.search || 
@@ -40,7 +50,7 @@ export function TableFilters() {
     state.filters.dateRange.to;
 
   const clearFilters = () => {
-    setSearchValue('');
+    setSearchInput('');
     setFilters({
       search: '',
       author: '',
@@ -48,16 +58,6 @@ export function TableFilters() {
       category: '',
       dateRange: { from: undefined, to: undefined }
     });
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearchValue(value);
-    // Simple debounce implementation
-    const timeoutId = setTimeout(() => {
-      setFilters({ search: value });
-    }, 300);
-    
-    return () => clearTimeout(timeoutId);
   };
 
   return (
@@ -68,7 +68,7 @@ export function TableFilters() {
           <Label className="text-sm font-medium">Filters</Label>
         </div>
         
-        {hasActiveFilters && (
+        {hasActiveFilters && hasPermission('write') && (
           <Button 
             variant="outline" 
             size="sm" 
@@ -92,8 +92,8 @@ export function TableFilters() {
             <Input
               id="search"
               placeholder="Search by title..."
-              value={searchValue}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 h-9"
             />
           </div>

@@ -25,11 +25,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useDashboard } from '@/contexts/DashboardContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Article, SortField, SortDirection } from '@/types/article';
 import { EditArticleModal } from './EditArticleModal';
 
 export function ArticlesTable() {
   const { state, setSorting } = useDashboard();
+  const { hasPermission } = useAuth();
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   const handleSort = (field: SortField) => {
@@ -167,18 +169,22 @@ export function ArticlesTable() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setEditingArticle(article)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Eye className="mr-2 h-4 w-4" />
                         View
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
+                      {hasPermission('write') && (
+                        <DropdownMenuItem onClick={() => setEditingArticle(article)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+                      {hasPermission('delete') && (
+                        <DropdownMenuItem className="text-destructive">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

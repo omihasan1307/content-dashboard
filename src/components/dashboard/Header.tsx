@@ -1,54 +1,82 @@
-import { Search, Bell, Plus, Menu } from 'lucide-react';
+import { Bell, Settings, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { useState } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from '@/components/ui/badge';
 
-interface HeaderProps {
-  onMenuClick?: () => void;
-  showMenuButton?: boolean;
-}
+export function Header() {
+  const { user, logout } = useAuth();
 
-export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
-  const { setFilters } = useDashboard();
-  const [searchValue, setSearchValue] = useState('');
-
-  const handleSearch = (value: string) => {
-    setSearchValue(value);
-    // Debounce search - you can implement proper debouncing here
-    setFilters({ search: value });
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'destructive';
+      case 'editor': return 'secondary';
+      case 'viewer': return 'outline';
+      default: return 'outline';
+    }
   };
 
   return (
-    <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6">
-      <div className="flex items-center space-x-4">
-        {showMenuButton && (
-          <Button variant="ghost" size="sm" onClick={onMenuClick}>
-            <Menu className="h-4 w-4" />
-          </Button>
-        )}
-        
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search articles..."
-            value={searchValue}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="pl-10 w-80"
-          />
+    <header className="bg-card border-b border-border px-6 py-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Manage your content and analytics</p>
         </div>
-      </div>
-
-      <div className="flex items-center space-x-4">
-        <Button variant="outline" size="sm">
-          <Bell className="h-4 w-4 mr-2" />
-          Notifications
-        </Button>
         
-        <Button className="button-primary" size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          New Article
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm">
+            <Bell className="h-4 w-4" />
+          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarFallback>
+                    {user?.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden md:flex items-center gap-2">
+                  <span>{user?.name}</span>
+                  <Badge variant={getRoleColor(user?.role || '')} className="text-xs">
+                    {user?.role}
+                  </Badge>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div>
+                  <div className="font-medium">{user?.name}</div>
+                  <div className="text-xs text-muted-foreground">{user?.email}</div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

@@ -19,8 +19,9 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useDashboard } from '@/contexts/DashboardContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Article } from '@/types/article';
-import { Save, X } from 'lucide-react';
+import { Save, X, AlertCircle } from 'lucide-react';
 
 interface EditArticleModalProps {
   article: Article | null;
@@ -38,6 +39,7 @@ interface FormData {
 
 export function EditArticleModal({ article, open, onClose }: EditArticleModalProps) {
   const { updateArticle } = useDashboard();
+  const { hasPermission } = useAuth();
   const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -92,11 +94,20 @@ export function EditArticleModal({ article, open, onClose }: EditArticleModalPro
       return;
     }
 
+    if (!hasPermission('write')) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to edit articles",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       const updatedArticle: Article = {
         ...article,
@@ -111,7 +122,7 @@ export function EditArticleModal({ article, open, onClose }: EditArticleModalPro
       
       toast({
         title: "Success",
-        description: "Article updated successfully",
+        description: "Article updated successfully! Changes have been saved.",
         variant: "default",
       });
 
@@ -119,7 +130,7 @@ export function EditArticleModal({ article, open, onClose }: EditArticleModalPro
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update article",
+        description: "Failed to update article. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -134,6 +145,31 @@ export function EditArticleModal({ article, open, onClose }: EditArticleModalPro
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
+
+  if (!hasPermission('write')) {
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              Access Denied
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-muted-foreground">
+              You don't have permission to edit articles. Please contact your administrator for access.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
