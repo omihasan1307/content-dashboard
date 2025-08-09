@@ -1,24 +1,30 @@
-import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 
 export function Login() {
   const { login, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -26,41 +32,39 @@ export function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoginLoading(true);
 
     try {
       const success = await login(formData.email, formData.password);
-      
+
       if (success) {
         toast({
           title: "Login Successful",
           description: "Welcome back! Redirecting to dashboard...",
         });
       } else {
-        setError('Invalid email or password. Please try again.');
+        setError("Invalid email or password. Please try again.");
       }
     } catch (error) {
-      setError('An error occurred during login. Please try again.');
+      setError("An error occurred during login. Please try again.");
     } finally {
       setLoginLoading(false);
     }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (error) setError('');
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (error) setError("");
   };
 
   const demoCredentials = [
-    { role: 'Admin', email: 'admin@demo.com', password: 'admin123' },
-    { role: 'Editor', email: 'editor@demo.com', password: 'editor123' },
-    { role: 'Viewer', email: 'viewer@demo.com', password: 'viewer123' }
+    { role: "Admin", email: "admin@demo.com", password: "admin123" },
   ];
 
   const fillDemoCredentials = (email: string, password: string) => {
     setFormData({ email, password });
-    setError('');
+    setError("");
   };
 
   if (isLoading) {
@@ -80,11 +84,9 @@ export function Login() {
               <LogIn className="h-6 w-6" />
               Welcome Back
             </CardTitle>
-            <CardDescription>
-              Sign in to access your dashboard
-            </CardDescription>
+            <CardDescription>Sign in to access your dashboard</CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -94,21 +96,23 @@ export function Login() {
                   type="email"
                   placeholder="Enter your email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
                   required
                   className="transition-all duration-200"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     required
                     className="pr-10 transition-all duration-200"
                   />
@@ -134,8 +138,8 @@ export function Login() {
                 </Alert>
               )}
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full button-primary"
                 disabled={loginLoading}
               >
@@ -165,14 +169,16 @@ export function Login() {
           </CardHeader>
           <CardContent className="space-y-3">
             {demoCredentials.map((cred, index) => (
-              <div 
+              <div
                 key={index}
                 className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 cursor-pointer transition-colors"
                 onClick={() => fillDemoCredentials(cred.email, cred.password)}
               >
                 <div>
                   <div className="font-medium text-sm">{cred.role}</div>
-                  <div className="text-xs text-muted-foreground">{cred.email}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {cred.email}
+                  </div>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {cred.password}

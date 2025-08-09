@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Article, ArticleFilters, SortField, SortDirection } from '@/types/article';
 import { mockArticles } from '@/data/mockData';
@@ -43,10 +44,10 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
       return { ...state, articles: action.payload };
     
     case 'UPDATE_ARTICLE':
-      const updatedArticles = state.articles.map(article =>
+      { const updatedArticles = state.articles.map(article =>
         article.id === action.payload.id ? action.payload : article
       );
-      return { ...state, articles: updatedArticles };
+      return { ...state, articles: updatedArticles }; }
     
     case 'SET_FILTERS':
       return { 
@@ -70,7 +71,7 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
       return { ...state, itemsPerPage: action.payload, currentPage: 1 };
     
     case 'APPLY_FILTERS':
-      let filtered = [...state.articles];
+      { let filtered = [...state.articles];
       
       // Apply search filter
       if (state.filters.search) {
@@ -129,7 +130,7 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
         }
       });
       
-      return { ...state, filteredArticles: filtered };
+      return { ...state, filteredArticles: filtered }; }
     
     default:
       return state;
