@@ -27,7 +27,7 @@ export function Login() {
   const [error, setError] = useState("");
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
